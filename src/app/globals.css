@@ -1,26 +1,140 @@
 @import "tailwindcss";
 
+/*
+  Amazon Hydro Sense - design tokens
+
+  DARK ONLY. There is no light version of this site. Do not add `dark:`
+  variants, do not add prefers-color-scheme queries, and do not give any
+  new component a light surface. Every surface is one of the --surface
+  tokens below, all of which sit within a few points of near-black.
+
+  Accent: emerald-400 (#34d399), used sparingly. CTAs, the hero network
+  glow, the chart line, and small state marks. Never as a page-wide wash.
+
+  Display serif (Playfair Display Bold Italic, font-display): reserved for
+  ONE emphasized word inside a headline, never a full heading and never body
+  text. In the hero it also carries the accent color; in section titles it
+  stays the default ink color, no green. See italic descender clearance
+  (pb-1 reserve) on every instance.
+
+  Radius scale (shape lock, three documented tiers): buttons = pill
+  (rounded-full); media, cards and panels = rounded-xl; form inputs and
+  textareas = rounded-md. No other radius values.
+
+  Motion dials: VARIANCE 5 / MOTION 7 / DENSITY 5. Every animation
+  collapses to static under prefers-reduced-motion.
+
+  z-index scale: sticky header = z-40, overlays = z-50.
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  --background: #0a0a0a;
+  --surface: #121214;
+  --surface-elevated: #17171a;
+  --border: #27272a;
+  --border-soft: #1f1f23;
+
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #8b8b94;
+
+  --accent: #34d399;
+  --accent-strong: #10b981;
+  --accent-ink: #052e1d;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-line: var(--border);
+  --color-line-soft: var(--border-soft);
+  --color-ink: var(--text-primary);
+  --color-ink-dim: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-ink: var(--accent-ink);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-playfair);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/*
+  Cinematic media treatment: vignette + film grain over contained photos so
+  they share one texture with the page instead of reading as dropped-in
+  stock. Static overlays on static elements, never on scrolling containers.
+*/
+.media-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.media-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+}
+
+.media-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    130% 130% at 50% 40%,
+    transparent 52%,
+    rgb(0 0 0 / 0.42) 100%
+  );
+}
+
+/* Ken Burns: slow continuous push-in on the hero photo. Transform only. */
+@media (prefers-reduced-motion: no-preference) {
+  .ken-burns {
+    animation: ken-burns 24s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  @keyframes ken-burns {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.08);
+    }
+  }
 }
