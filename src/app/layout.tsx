@@ -25,10 +25,26 @@ const playfairDisplay = Playfair_Display({
   style: "italic",
 });
 
+const title = "Amazon Hydro Sense | River monitoring for the Amazon";
+const description =
+  "Sensor buoys and AI-driven analysis detecting heavy-metal contamination in rivers around Carajás, Pará. Continuous data for mining operators, regulators and communities.";
+
 export const metadata: Metadata = {
-  title: "Amazon Hydro Sense | River monitoring for the Amazon",
-  description:
-    "Sensor buoys and AI-driven analysis detecting heavy-metal contamination in rivers around Carajás, Pará. Continuous data for mining operators, regulators and communities.",
+  metadataBase: new URL("https://amazon-hydro-sense.vercel.app"),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    siteName: "Amazon Hydro Sense",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+  },
 };
 
 export const viewport = {
