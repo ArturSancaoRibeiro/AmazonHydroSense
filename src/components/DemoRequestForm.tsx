@@ -171,6 +171,10 @@ export function DemoRequestForm() {
         Book a demo
         <ArrowRight size={16} weight="bold" />
       </button>
+      <p className="mt-4 text-xs leading-relaxed text-ink-muted">
+        We only use this information to respond to your request. It is never
+        sold or shared with third parties.
+      </p>
     </form>
   );
 }
