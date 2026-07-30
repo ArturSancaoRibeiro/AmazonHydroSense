@@ -9,6 +9,12 @@ export function Footer() {
           <p className="mt-2 max-w-[40ch] text-sm leading-relaxed text-ink-dim">
             Continuous water-quality monitoring for Amazonian rivers.
           </p>
+          <a
+            href="mailto:amazonhydrosense@gmail.com"
+            className="mt-3 inline-block text-sm text-ink-dim underline underline-offset-2 transition hover:text-ink"
+          >
+            amazonhydrosense@gmail.com
+          </a>
         </div>
         <p className="text-sm text-ink-dim">© 2026 Amazon Hydro Sense</p>
       </div>
