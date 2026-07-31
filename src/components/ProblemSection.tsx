@@ -20,7 +20,7 @@ export function ProblemSection() {
   return (
     <section id="problem" className="relative overflow-hidden">
       <ParallaxBackground
-        src="/images/calm-river-dawn.png"
+        src="/images/calm-river-dawn.webp"
         alt="A calm Amazonian river at dawn, mist over mirror-smooth water reflecting dense rainforest"
       />
       {/* Scrim: light uniform base plus a gradient weighted to the text side.

@@ -38,15 +38,15 @@ export function HowItWorks() {
             <Reveal delay={0.1} className="mt-10">
               <div className="media-frame aspect-[4/3] w-full rounded-xl">
                 <Image
-                  src="/images/sensor-closeup.png"
-                  alt="A brushed-steel water quality probe half submerged in dark river water, forest out of focus behind it"
+                  src="/images/buoy-on-river.webp"
+                  alt="An Amazon Hydro Sense buoy floating upright on a calm river, solar panel and antenna mast above the hull, rainforest bank behind"
                   fill
                   className="object-cover"
                   sizes="(min-width: 1024px) 40vw, 100vw"
                 />
               </div>
               <p className="mt-3 text-xs text-ink-dim">
-                The multiparameter probe on a Hydro Sense unit.
+                A Hydro Sense station anchored on the river.
               </p>
             </Reveal>
           </div>
