@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { DevIndicatorHider } from "@/components/DevIndicatorHider";
 import "./globals.css";
 
@@ -65,6 +66,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col overflow-x-clip bg-background text-ink">
         <DevIndicatorHider />
         {children}
+        <Analytics />
       </body>
     </html>
   );
