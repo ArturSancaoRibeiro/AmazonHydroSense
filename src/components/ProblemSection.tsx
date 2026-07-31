@@ -20,14 +20,16 @@ export function ProblemSection() {
   return (
     <section id="problem" className="relative overflow-hidden">
       <ParallaxBackground
-        src="/images/sediment-plume.png"
-        alt="Aerial view of a muddy sediment plume meeting dark clear water in an Amazonian river"
+        src="/images/calm-river-dawn.png"
+        alt="A calm Amazonian river at dawn, mist over mirror-smooth water reflecting dense rainforest"
       />
-      {/* Scrim: uniform base plus a gradient weighted to the text side */}
-      <div aria-hidden className="absolute inset-0 bg-background/60" />
+      {/* Scrim: light uniform base plus a gradient weighted to the text side.
+          Kept deliberately thin on the right so the river still reads as calm
+          and clean, which is the point the headline is making. */}
+      <div aria-hidden className="absolute inset-0 bg-background/40" />
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/35"
+        className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/20"
       />
 
       <div className="relative mx-auto max-w-[1400px] px-6 py-24 lg:px-10 lg:py-36">
