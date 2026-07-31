@@ -45,8 +45,8 @@ export function MetricsSection() {
             What each buoy measures
           </h2>
           <p className="mt-5 max-w-[58ch] leading-relaxed text-ink-dim">
-            Four core parameters, benchmarked against the limits of Brazil's
-            CONAMA Resolution 357/2005.
+            Four core parameters, benchmarked against the limits of
+            Brazil&apos;s CONAMA Resolution 357/2005.
           </p>
         </Reveal>
 

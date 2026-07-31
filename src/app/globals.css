@@ -138,3 +138,130 @@ html {
     }
   }
 }
+
+/*
+  ── Scroll-controlled cinematic hero ────────────────────────────────────────
+  The track is a tall scroll runway; the sticky child is the pinned viewport.
+  Scroll length is a variable so it can be tuned per breakpoint without
+  touching the component (see SCROLL_LENGTH_VH in src/data/heroCinematic.ts,
+  which documents the same numbers).
+*/
+.hero-track {
+  --hero-scroll-length: 420vh;
+  height: var(--hero-scroll-length);
+}
+
+@media (min-width: 768px) {
+  .hero-track {
+    --hero-scroll-length: 500vh;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-track {
+    --hero-scroll-length: 600vh;
+  }
+}
+
+.hero-sticky {
+  height: 100vh; /* fallback for browsers without dvh */
+  height: 100dvh;
+}
+
+.hero-stage {
+  will-change: opacity, transform;
+}
+
+@keyframes hero-loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.hero-loading-bar {
+  animation: hero-loading-slide 1.1s ease-in-out infinite;
+}
+
+/*
+  Static mode: reduced-motion preference, or a video that failed to load.
+  The runway collapses, the sticky viewport becomes an ordinary hero, only the
+  first stage remains, and the CTAs sit under it in normal flow. No pinning,
+  no scrubbing, no tall empty scroll.
+*/
+.hero-track[data-hero-static="true"] {
+  height: auto;
+}
+
+.hero-track[data-hero-static="true"] .hero-sticky {
+  position: relative;
+  height: auto;
+  min-height: 88vh;
+  min-height: 88dvh;
+  padding-block: 6rem 4rem;
+}
+
+.hero-track[data-hero-static="true"] .hero-stage {
+  position: relative;
+  top: auto;
+  transform: none !important;
+  opacity: 1 !important;
+  will-change: auto;
+}
+
+.hero-track[data-hero-static="true"] .hero-stage:not([data-hero-stage="0"]) {
+  display: none;
+}
+
+.hero-track[data-hero-static="true"] .hero-cta {
+  position: relative;
+  inset: auto;
+  margin-top: 2rem;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.hero-track[data-hero-static="true"] .hero-progress {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-track {
+    height: auto;
+  }
+
+  .hero-track .hero-sticky {
+    position: relative;
+    height: auto;
+    min-height: 88vh;
+    min-height: 88dvh;
+    padding-block: 6rem 4rem;
+  }
+
+  .hero-track .hero-stage {
+    position: relative;
+    top: auto;
+    transform: none !important;
+    opacity: 1 !important;
+    will-change: auto;
+  }
+
+  .hero-track .hero-stage:not([data-hero-stage="0"]) {
+    display: none;
+  }
+
+  .hero-track .hero-cta {
+    position: relative;
+    inset: auto;
+    margin-top: 2rem;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .hero-track .hero-progress,
+  .hero-track .hero-loading-bar {
+    display: none;
+  }
+}

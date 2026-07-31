@@ -1,5 +1,5 @@
 import { SiteNav } from "@/components/SiteNav";
-import { Hero } from "@/components/Hero";
+import { CinematicHero } from "@/components/CinematicHero";
 import { ParameterMarquee } from "@/components/ParameterMarquee";
 import { ProblemSection } from "@/components/ProblemSection";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -15,7 +15,7 @@ export default function Home() {
     <>
       <SiteNav />
       <main className="flex-1">
-        <Hero />
+        <CinematicHero />
         <ParameterMarquee />
         <ProblemSection />
         <HowItWorks />

@@ -34,7 +34,7 @@ export function ProblemSection() {
         <div className="max-w-xl">
           <Reveal>
             <h2 className="text-3xl font-medium tracking-tight text-balance text-ink md:text-4xl">
-              Heavy metals don't change the color of the water.
+              Heavy metals don&apos;t change the color of the water.
             </h2>
             <p className="mt-5 leading-relaxed text-ink-dim">
               The most dangerous contamination is invisible from the riverbank.
