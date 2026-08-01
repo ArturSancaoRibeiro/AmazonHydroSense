@@ -12,6 +12,7 @@ import { ArrowRight } from "@phosphor-icons/react";
 */
 const FORM_ENDPOINT = "https://formspree.io/f/mpqvgaqn";
 const RECIPIENT = "amazonhydrosense@gmail.com";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type FormState = {
   name: string;
@@ -64,7 +65,7 @@ function Field({
   );
 }
 
-type SubmitState = "idle" | "submitting" | "sent" | "error";
+type SubmitState = "idle" | "checking" | "submitting" | "sent" | "error";
 
 export function DemoRequestForm() {
   const [values, setValues] = useState<FormState>(initialState);
@@ -84,12 +85,32 @@ export function DemoRequestForm() {
     const nextErrors: FormErrors = {};
     if (!values.name.trim()) nextErrors.name = "Enter your name.";
     if (!values.company.trim()) nextErrors.company = "Enter your company.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+    if (!EMAIL_RE.test(values.email.trim())) {
       nextErrors.email = "Enter a valid email address.";
     }
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
+    }
+
+    setStatus("checking");
+    try {
+      const verifyRes = await fetch("/api/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email.trim() }),
+      });
+      const verify = await verifyRes.json();
+      if (!verify.valid) {
+        setErrors((err) => ({
+          ...err,
+          email: "This email domain doesn't look like it can receive messages.",
+        }));
+        setStatus("idle");
+        return;
+      }
+    } catch {
+      // Our own check failing shouldn't block a real submission over it.
     }
 
     setStatus("submitting");
@@ -188,11 +209,17 @@ export function DemoRequestForm() {
 
       <button
         type="submit"
-        disabled={status === "submitting"}
+        disabled={status === "checking" || status === "submitting"}
         className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-accent-ink transition hover:bg-white active:translate-y-px disabled:opacity-60 sm:w-auto"
       >
-        {status === "submitting" ? "Sending..." : "Book a demo"}
-        {status !== "submitting" && <ArrowRight size={16} weight="bold" />}
+        {status === "checking" && "Checking email..."}
+        {status === "submitting" && "Sending..."}
+        {status !== "checking" && status !== "submitting" && (
+          <>
+            Book a demo
+            <ArrowRight size={16} weight="bold" />
+          </>
+        )}
       </button>
       <p className="mt-4 text-xs leading-relaxed text-ink-muted">
         We only use this information to respond to your request. It is never
