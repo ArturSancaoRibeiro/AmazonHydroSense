@@ -125,7 +125,8 @@ export type HeroStage = {
   body: string;
   side: "left" | "right" | "center";
   overlayBoost?: number;
-  parameters?: string[];
+  /** Short operational highlights, not a restatement of the parameter marquee. */
+  tags?: string[];
   cta?: boolean;
 };
 
@@ -185,16 +186,15 @@ export const heroStages: HeroStage[] = [
     end: 0.86,
     eyebrow: "Water-quality sensing",
     headline: "Each parameter reveals part of the river's condition.",
-    body: "Turbidity, conductivity, pH, temperature and configurable sensing modules provide continuous environmental context.",
+    body: "The sensor cage stays submerged year-round, logging continuously through every season with no manual sampling.",
     side: "left",
     // Underwater footage is already dark; lighten so sensor detail reads.
     overlayBoost: -0.06,
-    parameters: [
-      "Turbidity",
-      "Conductivity",
-      "pH",
-      "Temperature",
-      "Optional dissolved oxygen",
+    tags: [
+      "Submersible enclosure",
+      "Continuous logging",
+      "No manual sampling",
+      "Day and night",
     ],
   },
   {

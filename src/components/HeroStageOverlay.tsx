@@ -59,18 +59,18 @@ export function HeroStageOverlay({ stage, index, isPrimary, ref }: Props) {
           {stage.body}
         </p>
 
-        {stage.parameters && (
+        {stage.tags && (
           <ul
             className={`mt-6 flex max-w-[42ch] flex-wrap gap-x-5 gap-y-2 ${
               stage.side === "right" ? "lg:justify-end" : ""
             }`}
           >
-            {stage.parameters.map((parameter) => (
+            {stage.tags.map((tag) => (
               <li
-                key={parameter}
+                key={tag}
                 className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/55"
               >
-                {parameter}
+                {tag}
               </li>
             ))}
           </ul>
