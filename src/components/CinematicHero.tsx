@@ -176,7 +176,7 @@ export function CinematicHero() {
           aria-hidden="true"
           tabIndex={-1}
           disablePictureInPicture
-          className="hero-video absolute inset-0 h-full w-full object-cover"
+          className="hero-video absolute inset-0 h-full w-full object-contain md:object-cover"
         />
 
         {/* Layered scrim: flat base, then a directional wash behind the copy. */}
