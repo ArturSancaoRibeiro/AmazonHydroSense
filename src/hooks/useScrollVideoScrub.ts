@@ -11,7 +11,7 @@ type Options = {
   videoRef: RefObject<HTMLVideoElement | null>;
   /** False for reduced motion or after a video failure: no loop, no seeking. */
   enabled: boolean;
-  /** Called on every animation frame with clamped scroll progress (0..1). */
+  /** Called on every animation frame with clamped, rate-limited progress (0..1). */
   onFrame: (progress: number) => void;
 };
 
@@ -25,6 +25,39 @@ type Options = {
 
   The video is never played. It stays paused and we seek it, which is why the
   source is encoded all-intra (see heroCinematic.ts).
+
+  ── Rate limit ──────────────────────────────────────────────────────────────
+  The video is 15s; a fast flick can otherwise cover the whole 600vh runway in
+  under 2 seconds, blowing past every caption unread. `effectiveProgress` is a
+  lagged progress value that can only advance at a maximum of 1x (one second
+  of video per one second of real time), in either direction. Scrolling
+  slower than that is untouched, unmodified passthrough.
+
+  Two values are tracked, not one:
+  - `desiredProgress`: where the reader's own scroll input wants to be. It
+    only moves in response to NEW scroll delta since our own last correction,
+    tracked via `lastAppliedScrollYRef`, so it never forgets how far the
+    reader was trying to go just because a previous frame paused progress
+    there.
+  - `effectiveProgress`: the rate-capped value that actually drives the video
+    and the on-screen copy.
+
+  Naive versions of this collapse the two into one: after each correction,
+  the very next frame reads the corrected scrollY back as if it were fresh
+  input, sees no further delta, and stops advancing until the next discrete
+  scroll event arrives. Wheel input is not a continuous stream, it is
+  discrete notches (as few as ~15-20/sec on plain mice), often sparser than
+  the ~120Hz this rAF loop can run at. Collapsing the two values means most
+  frames land in the "nothing to resist" gap between notches, and the
+  measured advance rate ends up well under the intended 1x rather than at
+  it. Tracking desire and effective progress separately fixes that: every
+  frame still advances `effectiveProgress` toward the remembered desired
+  value at up to the capped rate, whether or not that particular frame
+  carried fresh input.
+
+  Once `effectiveProgress` reaches 0 or 1, correction stops touching scrollY
+  entirely, at either end, so the reader is never blocked from leaving the
+  section once the sequence has actually finished.
 */
 export function useScrollVideoScrub({
   trackRef,
@@ -45,6 +78,10 @@ export function useScrollVideoScrub({
   const targetTimeRef = useRef(0);
   const durationRef = useRef(VIDEO_DURATION_FALLBACK);
   const inViewRef = useRef(true);
+  const desiredProgressRef = useRef(0);
+  const effectiveProgressRef = useRef(0);
+  const lastAppliedScrollYRef = useRef<number | null>(null);
+  const lastFrameAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -63,6 +100,20 @@ export function useScrollVideoScrub({
     };
     measure();
 
+    // Seed from wherever the reader actually is (deep link, browser scroll
+    // restoration, etc.) instead of forcing a replay from zero.
+    {
+      const { top, height, viewport } = metricsRef.current;
+      const scrollable = height - viewport;
+      const initial =
+        scrollable > 0
+          ? Math.min(Math.max((window.scrollY - top) / scrollable, 0), 1)
+          : 0;
+      desiredProgressRef.current = initial;
+      effectiveProgressRef.current = initial;
+      lastAppliedScrollYRef.current = window.scrollY;
+    }
+
     const readDuration = () => {
       if (video && Number.isFinite(video.duration) && video.duration > 0) {
         durationRef.current = video.duration;
@@ -71,16 +122,62 @@ export function useScrollVideoScrub({
     readDuration();
     video?.addEventListener("loadedmetadata", readDuration);
 
-    const loop = () => {
+    const loop = (now: number) => {
       rafRef.current = requestAnimationFrame(loop);
-      if (!inViewRef.current) return;
+      if (!inViewRef.current) {
+        lastFrameAtRef.current = null; // don't count paused-offscreen time
+        return;
+      }
 
       const { top, height, viewport } = metricsRef.current;
-      const scrollable = height - viewport;
-      const progress =
-        scrollable > 0
-          ? Math.min(Math.max((window.scrollY - top) / scrollable, 0), 1)
-          : 0;
+      const cachedScrollable = height - viewport;
+
+      if (cachedScrollable > 0) {
+        const currentScrollY = window.scrollY;
+        const nativeDeltaPx =
+          currentScrollY - (lastAppliedScrollYRef.current ?? currentScrollY);
+        if (nativeDeltaPx !== 0) {
+          desiredProgressRef.current = Math.min(
+            Math.max(
+              desiredProgressRef.current + nativeDeltaPx / cachedScrollable,
+              0,
+            ),
+            1,
+          );
+        }
+      }
+
+      const dt =
+        lastFrameAtRef.current === null
+          ? 0
+          : Math.min((now - lastFrameAtRef.current) / 1000, 0.1);
+      lastFrameAtRef.current = now;
+
+      const maxStep = dt / durationRef.current; // progress-units for 1x speed
+      const delta = desiredProgressRef.current - effectiveProgressRef.current;
+
+      if (Math.abs(delta) > maxStep) {
+        effectiveProgressRef.current += Math.sign(delta) * maxStep;
+      } else {
+        effectiveProgressRef.current = desiredProgressRef.current;
+      }
+
+      const progress = effectiveProgressRef.current;
+
+      // Only hold the reader inside the section mid-sequence. At either end
+      // (finished, or not yet started), stop touching scrollY entirely so
+      // leaving the section is never blocked.
+      if (progress > 0 && progress < 1 && cachedScrollable > 0) {
+        const correctedScrollY = top + progress * cachedScrollable;
+        // `behavior: "instant"` bypasses the site-wide `scroll-behavior:
+        // smooth`: without it, each correction kicks off its own smooth
+        // animation that fights the next frame's correction, netting out
+        // well under the intended 1x cap instead of exactly at it.
+        window.scrollTo({ top: correctedScrollY, left: 0, behavior: "instant" });
+        lastAppliedScrollYRef.current = correctedScrollY;
+      } else {
+        lastAppliedScrollYRef.current = window.scrollY;
+      }
 
       onFrameRef.current(progress);
 
@@ -95,11 +192,11 @@ export function useScrollVideoScrub({
         that it converges within a few frames, so the video never keeps
         drifting after the user stops scrolling.
       */
-      const delta = targetTimeRef.current - currentTimeRef.current;
+      const timeDelta = targetTimeRef.current - currentTimeRef.current;
       currentTimeRef.current =
-        Math.abs(delta) < 0.008
+        Math.abs(timeDelta) < 0.008
           ? targetTimeRef.current
-          : currentTimeRef.current + delta * 0.22;
+          : currentTimeRef.current + timeDelta * 0.22;
 
       if (
         video.readyState >= 1 &&
