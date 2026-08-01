@@ -4,12 +4,13 @@ import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "reac
 import { ArrowRight } from "@phosphor-icons/react";
 
 /*
-  No backend yet: submitting builds a mailto: link from the field values and
-  hands off to the visitor's mail client. This is a placeholder funnel, not
-  a lead-capture system, until a real form endpoint or CRM integration
-  exists. B2B visitors almost always have a corporate mail client
-  registered, so mailto: is the simpler default here.
+  Submits to Formspree, which forwards each entry straight to
+  amazonhydrosense@gmail.com. This replaced an earlier mailto: link: that
+  approach depended on the visitor's own mail client actually sending the
+  draft, so a submission could silently never arrive. Formspree removes that
+  dependency, and needs no backend of our own.
 */
+const FORM_ENDPOINT = "https://formspree.io/f/mpqvgaqn";
 const RECIPIENT = "amazonhydrosense@gmail.com";
 
 type FormState = {
@@ -63,10 +64,12 @@ function Field({
   );
 }
 
+type SubmitState = "idle" | "submitting" | "sent" | "error";
+
 export function DemoRequestForm() {
   const [values, setValues] = useState<FormState>(initialState);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<SubmitState>("idle");
 
   function handleChange(field: keyof FormState) {
     return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -76,7 +79,7 @@ export function DemoRequestForm() {
     };
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const nextErrors: FormErrors = {};
     if (!values.name.trim()) nextErrors.name = "Enter your name.";
@@ -89,26 +92,33 @@ export function DemoRequestForm() {
       return;
     }
 
-    const subject = `Amazon Hydro Sense demo request, ${values.company}`;
-    const body = [
-      `Name: ${values.name}`,
-      `Company: ${values.company}`,
-      `Email: ${values.email}`,
-      "",
-      values.message.trim() || "(no message)",
-    ].join("\n");
-    window.location.href = `mailto:${RECIPIENT}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setSent(true);
+    setStatus("submitting");
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.name,
+          company: values.company,
+          email: values.email,
+          message: values.message.trim() || "(no message)",
+          _subject: `Amazon Hydro Sense demo request, ${values.company}`,
+        }),
+      });
+      setStatus(res.ok ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
   }
 
-  if (sent) {
+  if (status === "sent") {
     return (
       <div className="rounded-xl border border-line bg-surface p-6 lg:p-8">
         <p className="text-sm font-medium text-ink">
-          Your email client should be open now.
+          Request sent. We&apos;ll get back to you shortly.
         </p>
         <p className="mt-2 text-sm leading-relaxed text-ink-dim">
-          If nothing happened, write to us directly at{" "}
+          You can also reach us directly at{" "}
           <a
             href={`mailto:${RECIPIENT}`}
             className="text-accent underline underline-offset-2"
@@ -164,12 +174,25 @@ export function DemoRequestForm() {
           />
         </Field>
       </div>
+
+      {status === "error" && (
+        <p className="mt-4 text-sm text-amber-500">
+          Something went wrong sending this. Try again, or write to us
+          directly at{" "}
+          <a href={`mailto:${RECIPIENT}`} className="underline underline-offset-2">
+            {RECIPIENT}
+          </a>
+          .
+        </p>
+      )}
+
       <button
         type="submit"
-        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-accent-ink transition hover:bg-white active:translate-y-px sm:w-auto"
+        disabled={status === "submitting"}
+        className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-accent-ink transition hover:bg-white active:translate-y-px disabled:opacity-60 sm:w-auto"
       >
-        Book a demo
-        <ArrowRight size={16} weight="bold" />
+        {status === "submitting" ? "Sending..." : "Book a demo"}
+        {status !== "submitting" && <ArrowRight size={16} weight="bold" />}
       </button>
       <p className="mt-4 text-xs leading-relaxed text-ink-muted">
         We only use this information to respond to your request. It is never

@@ -2,6 +2,7 @@ import { ParallaxBackground } from "./ParallaxBackground";
 import { Reveal } from "./Reveal";
 
 const details = [
+  { label: "Country", value: "Brazil, Amazon rainforest" },
   { label: "Region", value: "Serra dos Carajás, Pará" },
   { label: "River basin", value: "Rio Itacaiúnas" },
   { label: "Nearby operations", value: "Salobo and Paulo Afonso" },
@@ -30,14 +31,15 @@ export function LocationSection() {
             Where Hydro Sense operates
           </h2>
           <p className="mt-5 max-w-[60ch] leading-relaxed text-ink-dim">
-            Southeastern Pará. The first units cover the Itacaiúnas river
-            basin, which drains the Serra dos Carajás and supplies communities
-            downstream of the Salobo and Paulo Afonso operations.
+            Northern Brazil, deep in the Amazon rainforest. The first units
+            cover the Itacaiúnas river basin, which drains the Serra dos
+            Carajás region in the state of Pará and supplies communities
+            downstream of the Salobo and Paulo Afonso mining operations.
           </p>
         </Reveal>
 
         <Reveal delay={0.1}>
-          <dl className="mt-10 grid gap-8 border-t border-line pt-8 md:grid-cols-3">
+          <dl className="mt-10 grid grid-cols-2 gap-8 border-t border-line pt-8 md:grid-cols-4">
             {details.map((item) => (
               <div key={item.label}>
                 <dt className="text-sm text-ink-dim">{item.label}</dt>
