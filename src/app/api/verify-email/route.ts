@@ -1,14 +1,21 @@
-import { resolveMx, resolve4, resolve6 } from "node:dns/promises";
+import { resolveMx } from "node:dns/promises";
 import { NextResponse } from "next/server";
 
 /*
-  Domain-level email check: confirms the email's domain has a mail server
-  willing to receive mail (an MX record, or an A/AAAA record as the RFC 5321
-  fallback for domains without MX). This is NOT mailbox verification: it
-  cannot tell whether a specific inbox exists, only that the domain isn't
-  fabricated (catches things like a@f.co, which has no mail-capable domain
-  at all). Real mailbox verification needs an SMTP handshake or a paid
-  third-party service; out of scope here.
+  Domain-level email check: confirms the email's domain has an MX record, i.e.
+  a mail server actually configured to receive mail. This is NOT mailbox
+  verification: it cannot tell whether a specific inbox exists, only that the
+  domain is set up to receive email at all.
+
+  Deliberately does NOT fall back to a domain's A/AAAA record. RFC 5321
+  allows that as a legacy fallback, but in practice a domain with an A record
+  and no MX almost never actually runs a mail server there, it's just a
+  website, exactly the case that let a@f.co through before this existed.
+  Requiring MX is the stronger, more accurate signal for "can this receive
+  mail," which is the whole point of this check.
+
+  Real mailbox verification needs an SMTP handshake or a paid third-party
+  service; out of scope here.
 
   TEST_EXCEPTIONS bypasses the DNS check entirely so the team can keep
   testing the form without a deliverable inbox.
@@ -41,21 +48,8 @@ export async function POST(request: Request) {
     if (mx.length > 0) {
       return NextResponse.json({ valid: true, reason: "mx-found" });
     }
+    return NextResponse.json({ valid: false, reason: "no-mx-record" });
   } catch {
-    // No MX record. Fall through to the A/AAAA fallback below.
+    return NextResponse.json({ valid: false, reason: "domain-unreachable" });
   }
-
-  try {
-    const [a4, a6] = await Promise.allSettled([resolve4(domain), resolve6(domain)]);
-    const hasAddress =
-      (a4.status === "fulfilled" && a4.value.length > 0) ||
-      (a6.status === "fulfilled" && a6.value.length > 0);
-    if (hasAddress) {
-      return NextResponse.json({ valid: true, reason: "a-record-fallback" });
-    }
-  } catch {
-    // Fall through to invalid below.
-  }
-
-  return NextResponse.json({ valid: false, reason: "domain-unreachable" });
 }
