@@ -3,7 +3,6 @@ import { CinematicHero } from "@/components/CinematicHero";
 import { ParameterMarquee } from "@/components/ParameterMarquee";
 import { ProblemSection } from "@/components/ProblemSection";
 import { HowItWorks } from "@/components/HowItWorks";
-import { MetricsSection } from "@/components/MetricsSection";
 import { LocationSection } from "@/components/LocationSection";
 import { AudienceSection } from "@/components/AudienceSection";
 import { FinalCta } from "@/components/FinalCta";
@@ -18,7 +17,6 @@ export default function Home() {
         <ParameterMarquee />
         <ProblemSection />
         <HowItWorks />
-        <MetricsSection />
         <LocationSection />
         <AudienceSection />
         <FinalCta />

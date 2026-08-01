@@ -190,12 +190,6 @@ export const heroStages: HeroStage[] = [
     side: "left",
     // Underwater footage is already dark; lighten so sensor detail reads.
     overlayBoost: -0.06,
-    tags: [
-      "Submersible enclosure",
-      "Continuous logging",
-      "No manual sampling",
-      "Day and night",
-    ],
   },
   {
     id: "analysis",
