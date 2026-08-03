@@ -2,7 +2,6 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  Atom,
   Drop,
   Lightning,
   TestTube,
@@ -20,7 +19,6 @@ const parameters = [
   { label: "Turbidity", unit: "NTU", Icon: Waves },
   { label: "Dissolved oxygen", unit: "mg/L", Icon: Drop },
   { label: "pH", unit: "0 to 14", Icon: TestTube },
-  { label: "Total mercury", unit: "µg/L", Icon: Atom },
   { label: "Conductivity", unit: "µS/cm", Icon: Lightning },
   { label: "Temperature", unit: "°C", Icon: ThermometerSimple },
 ];

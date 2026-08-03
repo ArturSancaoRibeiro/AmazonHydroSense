@@ -131,9 +131,24 @@ export function useScrollVideoScrub({
 
       const { top, height, viewport } = metricsRef.current;
       const cachedScrollable = height - viewport;
+      const currentScrollY = window.scrollY;
 
-      if (cachedScrollable > 0) {
-        const currentScrollY = window.scrollY;
+      /*
+        Only let raw scroll delta drive desiredProgress while the reader is
+        actually inside the track's document range. Without this guard, once
+        desiredProgress sits at exactly 0 or 1 (not yet started, or
+        finished), scroll input anywhere else on the page, including deep
+        into later sections, nudges it back off that edge. The very next
+        frame then sees `progress` strictly between 0 and 1 and teleports
+        scrollY back into the hero, no matter how far away the reader
+        actually is. Outside the track, progress is pinned to the nearer
+        edge and the delta baseline is rebased so re-entering the track
+        later starts clean instead of replaying pent-up scroll distance.
+      */
+      const withinTrack =
+        currentScrollY >= top - 1 && currentScrollY <= top + height + 1;
+
+      if (withinTrack && cachedScrollable > 0) {
         const nativeDeltaPx =
           currentScrollY - (lastAppliedScrollYRef.current ?? currentScrollY);
         if (nativeDeltaPx !== 0) {
@@ -145,6 +160,10 @@ export function useScrollVideoScrub({
             1,
           );
         }
+      } else if (!withinTrack) {
+        desiredProgressRef.current = currentScrollY < top ? 0 : 1;
+        effectiveProgressRef.current = desiredProgressRef.current;
+        lastAppliedScrollYRef.current = currentScrollY;
       }
 
       const dt =
