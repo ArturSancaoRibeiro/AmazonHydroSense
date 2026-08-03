@@ -44,7 +44,7 @@ export function Hero() {
                   href="#contact"
                   className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-medium text-accent-ink transition hover:bg-white active:translate-y-px"
                 >
-                  Book a demo
+                  Get in touch
                   <ArrowRight size={16} weight="bold" />
                 </Link>
                 <Link

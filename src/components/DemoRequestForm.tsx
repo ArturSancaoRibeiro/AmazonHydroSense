@@ -216,7 +216,7 @@ export function DemoRequestForm() {
         {status === "submitting" && "Sending..."}
         {status !== "checking" && status !== "submitting" && (
           <>
-            Book a demo
+            Get in touch
             <ArrowRight size={16} weight="bold" />
           </>
         )}

@@ -5,6 +5,7 @@ import { ProblemSection } from "@/components/ProblemSection";
 import { HowItWorks } from "@/components/HowItWorks";
 import { LocationSection } from "@/components/LocationSection";
 import { AudienceSection } from "@/components/AudienceSection";
+import { FaqSection } from "@/components/FaqSection";
 import { FinalCta } from "@/components/FinalCta";
 import { Footer } from "@/components/Footer";
 
@@ -19,6 +20,7 @@ export default function Home() {
         <HowItWorks />
         <LocationSection />
         <AudienceSection />
+        <FaqSection />
         <FinalCta />
       </main>
       <Footer />
